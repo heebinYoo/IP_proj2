@@ -34,6 +34,6 @@ private:
 class SquareTracker
 {
 public:
-	void trackAndAction(std::vector <cv::Point2f> input, TrackerOption option);
+	cv::Point trackAndAction(std::vector <cv::Point2f> input, TrackerOption option);
 };
 

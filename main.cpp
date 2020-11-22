@@ -67,6 +67,7 @@ int main() {
                 ip_proj_lineData::y1 = ip_proj_lineData::y2;
                 ip_proj_lineData::y2 = temp;
             }
+            cv::setMouseCallback("guided image", NULL, NULL);
             break;
         }
 
@@ -101,11 +102,11 @@ int main() {
         else if (counter == 1) {
             cv::putText(img_guide, "V", cv::Point((ip_proj_lineData::x1 + 0) / 2, (ip_proj_lineData::y1 + 0) / 2), cv::FONT_HERSHEY_PLAIN, 2.0, cv::Scalar(0, 0, 255), 1);
         }
-        else if (counter == 2) {
+
+        else if (counter == 3) {
             cv::putText(img_guide, "V", cv::Point((ip_proj_lineData::x1 + 0) / 2, (ip_proj_lineData::y1 + 0) / 2), cv::FONT_HERSHEY_PLAIN, 2.0, cv::Scalar(0, 0, 255), 1);
             cv::putText(img_guide, "V", cv::Point((ip_proj_lineData::x1 + cols - 1) / 2, (ip_proj_lineData::y1 + 0) / 2), cv::FONT_HERSHEY_PLAIN, 2.0, cv::Scalar(0, 0, 255), 1);
         }
-       
         else if (counter == 4) {
             cv::putText(img_guide, "V", cv::Point((ip_proj_lineData::x1 + 0) / 2, (ip_proj_lineData::y1 + 0) / 2), cv::FONT_HERSHEY_PLAIN, 2.0, cv::Scalar(0, 0, 255), 1);
             cv::putText(img_guide, "V", cv::Point((ip_proj_lineData::x1 + cols - 1) / 2, (ip_proj_lineData::y1 + 0) / 2), cv::FONT_HERSHEY_PLAIN, 2.0, cv::Scalar(0, 0, 255), 1);
@@ -145,20 +146,41 @@ int main() {
             counter++;
         }
 
-        
-       
-
     }
 
-}
-//cv::imshow("camera img", img);
+    while (1) {
+        cap >> img;
+        cv::flip(img, img, 1);//웹캠이라서 좌우반전 걸어야 정상적으로 나옴
 
-		/*
-		cv::Mat redOnly;
-		hsvFilter.getRedOnlyImage(img, redOnly, FilterOption());
-		std::vector<cv::Point2f> result = extractor.getSquareVertex(redOnly, ExtractOption());
-		tracker.trackAndAction(result, TrackerOption(ip_proj_lineData::y1,ip_proj_lineData::y2,ip_proj_lineData::x1, ip_proj_lineData::keyCode));
-		*/
+        cv::Mat img_guide;
+        img.copyTo(img_guide);
+        int rows = img_guide.rows;
+        int cols = img_guide.cols;
+        cv::line(img_guide, cv::Point(cols / 2, 0), cv::Point(cols / 2, rows - 1), cv::Scalar(255, 0, 0), 1, 8, 0);
+        cv::line(img_guide, cv::Point(0, ip_proj_lineData::y1), cv::Point(cols - 1, ip_proj_lineData::y1), cv::Scalar(255, 255, 0), 1, 8, 0);
+        cv::line(img_guide, cv::Point(0, ip_proj_lineData::y2), cv::Point(cols - 1, ip_proj_lineData::y2), cv::Scalar(255, 0, 255), 1, 8, 0);
+        //cv::putText(img_guide, "y1", cv::Point(0, ip_proj_lineData::y1), cv::FONT_HERSHEY_PLAIN, 2.0, cv::Scalar(0, 0, 255), 1);
+        //cv::putText(img_guide, "y2", cv::Point(0, ip_proj_lineData::y2), cv::FONT_HERSHEY_PLAIN, 2.0, cv::Scalar(0, 0, 255), 1);
+        
+        cv::Mat redOnly;
+        hsvFilter.getRedOnlyImage(img, redOnly, FilterOption());
+        std::vector<cv::Point2f> result = extractor.getSquareVertex(redOnly, ExtractOption());
+        cv::Point pos = tracker.trackAndAction(result, TrackerOption(ip_proj_lineData::y1, ip_proj_lineData::y2, ip_proj_lineData::x1, ip_proj_lineData::keyCode));
+        cv::circle(img_guide, pos, 2.0, Scalar(0, 0, 255), 3, 8);
+
+
+
+        cv::imshow("guided image", img_guide);
+        if (cv::waitKey(1) == 27) {
+            break;
+        }
+    }
+
+    return 0;
+}
+
+
+
 void CallBackFunc(int event, int x, int y, int flags, void* userdata)
 {
     
@@ -173,44 +195,5 @@ void CallBackFunc(int event, int x, int y, int flags, void* userdata)
             (*((int*)userdata))++;
         }
     }
-    else if (event == EVENT_RBUTTONDOWN)
-    {
-        //std::cout << "Right button of the mouse is clicked - position (" << x << ", " << y << ")" << std::endl;
-    }
-    /*
-    else if (event == EVENT_MBUTTONDOWN)
-    {
-        std::cout << "Middle button of the mouse is clicked - position (" << x << ", " << y << ")" << std::endl;
-    }
-    else if (event == EVENT_MOUSEMOVE)
-    {
-        std::cout << "Mouse move over the window - position (" << x << ", " << y << ")" << std::endl;
-    }
-    else if (event == EVENT_LBUTTONUP)
-    {
-        std::cout << "Left button of the mouse is released - position (" << x << ", " << y << ")" << std::endl;
-    }
-    else if (event == EVENT_RBUTTONUP)
-    {
-        std::cout << "Right button of the mouse is released - position (" << x << ", " << y << ")" << std::endl;
-    }
-    else if (event == EVENT_MBUTTONUP)
-    {
-        std::cout << "Middle button of the mouse is released - position (" << x << ", " << y << ")" << std::endl;
-    }
-    else if (event == EVENT_LBUTTONDBLCLK)
-    {
-        std::cout << "Left button of the mouse is double-clicked - position (" << x << ", " << y << ")" << std::endl;
-    }
-    else if (event == EVENT_RBUTTONDBLCLK)
-    {
-        std::cout << "Right button of the mouse is double-clicked - position (" << x << ", " << y << ")" << std::endl;
-    }
-    else if (event == EVENT_MBUTTONDBLCLK)
-    {
-        std::cout << "Middle button of the mouse is double-clicked - position (" << x << ", " << y << ")" << std::endl;
-    }
-
-    */
-
+   
 }
