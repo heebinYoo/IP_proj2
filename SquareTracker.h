@@ -3,8 +3,8 @@
 #include <vector>
 #include<core.hpp>
 class TrackerOption {
+	friend class SquareTracker;
 public:
-	friend SquareTracker;
 	TrackerOption(int horizon_y1, int horizon_y2, int vertical_x1):y1(horizon_y1), y2(horizon_y2), x1(vertical_x1) {}
 
 private:
@@ -18,7 +18,6 @@ private:
 };
 class SquareTracker
 {
-
 public:
 	void trackAndAction(std::vector <cv::Point> input, TrackerOption option);
 };

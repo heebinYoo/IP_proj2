@@ -7,17 +7,15 @@
 #include<imgproc.hpp>
 
 class ExtractOption {
+	friend class SquareExtractor;
 public:
-	friend SquareExtractor;
+	
 
 };
 
 class SquareExtractor
 {
 public:
-	/*
-	* 8UC1 인 _src를 받아 꼭지점 4개를 리턴한다.
-	*/
-	std::vector<cv::Point> getSquareVertex(cv::InputArray _src, ExtractOption option);
+	std::vector<cv::Point2f> getSquareVertex(cv::InputArray _src, ExtractOption option);
 };
 

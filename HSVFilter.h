@@ -11,8 +11,9 @@
 
 class FilterOption
 {
+	friend class HSVFilter;
 public:
-	friend HSVFilter;
+	
 };
 
 class HSVFilter
