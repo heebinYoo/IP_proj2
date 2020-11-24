@@ -1,41 +1,69 @@
 #pragma once
-#include<core.hpp>
-#include<highgui.hpp>
+#include<opencv2/core.hpp>
+#include<opencv2/highgui.hpp>
 #include<iostream>
 #include<math.h>
-#include<imgproc.hpp>
+#include<opencv2/imgproc.hpp>
 
 /*
-* Àü°æ ÃßÃâ ¹× »ö ÇÊÅÍ¸µÀ» ÇØÁÖ´Â Å¬·¡½º
+* ì „ê²½ ì¶”ì¶œ ë° ìƒ‰ í•„í„°ë§ì„ í•´ì£¼ëŠ” í´ë˜ìŠ¤
 */
+
+enum Color
+{
+	red, green, blue
+};
 
 class FilterOption
 {
 	friend class HSVFilter;
 public:
-	
+	void settingColor(Color colorName);
+	int getColor();
+	void setHBoundary(int b);
+	void setSBoundary(int b);
+	void setVBoundary(int b);
+	int getHBoundary();
+	int getSBoundary();
+	int getVBoundary();
+
+private:
+	int baseColor=0;
+	int HBoundary=60, SBoundary=250, VBoundary=250;
+
 };
 
 class HSVFilter
 {
 public:
-	/*
-	Á¦ÀÏ Å¬·¡½ÄÇÑ ÀÎÀÚ Àü´Ş, È¸¼ö ¹æ¹ı
-	ÀÌ In/OutÀº _In/_OutÅ¬·¡½ºÀÇ ·¹ÆÛ·±½º Å¸ÀÔÀ¸·Î ÀçÁ¤ÀÇµÈ °ÍÀÓ, Áï ·¹ÆÛ·±½º¸¦ ¹Ş´Â ³ğ
-	
-	_src´Â 8UC3
-	_dst´Â 8UC1 : ±×·¹ÀÌ½ºÄÉÀÏ·Î ÁÖ¼¼¿ä
 
-	»ç¿ë
+	/*
+	ì œì¼ í´ë˜ì‹í•œ ì¸ì ì „ë‹¬, íšŒìˆ˜ ë°©ë²•
+	ì´ In/Outì€ _In/_Outí´ë˜ìŠ¤ì˜ ë ˆí¼ëŸ°ìŠ¤ íƒ€ì…ìœ¼ë¡œ ì¬ì •ì˜ëœ ê²ƒì„, ì¦‰ ë ˆí¼ëŸ°ìŠ¤ë¥¼ ë°›ëŠ” ë†ˆ
+	
+	_srcëŠ” 8UC3
+	_dstëŠ” 8UC1 : ê·¸ë ˆì´ìŠ¤ì¼€ì¼ë¡œ ì£¼ì„¸ìš”
+
+	ì‚¬ìš©
 	Mat src = _src.getMat();
 	_dst.create(src.size(), cv::8UC1);
 	Mat dst = _dst.getMat();
 
-	¿É¼ÇÀº ÇÊ¿äÇÑ °Í¿¡ ¸ÂÃß¾î Á¤ÀÇÇÒ °Í
+	ì˜µì…˜ì€ í•„ìš”í•œ ê²ƒì— ë§ì¶”ì–´ ì •ì˜í•  ê²ƒ
 	*/
+
 	void getRedOnlyImage(cv::InputArray _src, cv::OutputArray _dst, FilterOption option);
 	void getBlueOnlyImage(cv::InputArray _src, cv::OutputArray _dst, FilterOption option);
 	void getGreenOnlyImage(cv::InputArray _src, cv::OutputArray _dst, FilterOption option);
 
+private:
+	//í†µì¼ëœ ë°©ë²•ìœ¼ë¡œ ì§„í–‰í•˜ëŠ” ì¶”ì¶œ í•¨ìˆ˜
+	void getOnlyImage(cv::InputArray _src, cv::OutputArray _dst, FilterOption option);
+	
+	//hê°’ ë°”ìš´ë”ë¦¬ ì²´í¬ìš© í•¨ìˆ˜
+	bool HBoudaryCheck(int h, int baseColor, int boundary);
+	
+	//h, s, vê°’ ë°”ìš´ë”ë¦¬ ì²´í¬ìš©
+	bool isInBoundary(const int h, const int s, const int v, FilterOption option);
 };
 
