@@ -27,20 +27,31 @@ void HSVFilter::getOnlyImage(cv::InputArray _src, cv::OutputArray _dst, FilterOp
 	_dst.create(src.size(), CV_8UC1);
 	cv::Mat dst = _dst.getMat();
 
+
+
 	//높이와 너비 선언
 	const int height = src.size().height;
 	const int width = src.size().width;
+
+	//검은색으로 초기화
+	for (int y = 0; y < height; y++)
+		for (int x = 0; x < width; x++) {
+		
+			dst.at<uchar>(y, x) = (unsigned char)0;
+		}
 
 	//s,v 최대 최소 보정용, 0=min, 1=max
 	int sMinMax[2] = { 255,0 };
 	int vMinMax[2] = { 255,0 };
 
+	int resolution = option.getResolution();
+
 	//맵핑을 해줄 map 선언
-	int** map;
-	map = new int* [height];
-	for (int count = 0; count < height; count++) {
-	
-		map[count] = new int[width] {0};
+	bool** map;
+	map = new bool* [height / resolution];
+	for (int count = 0; count < height / resolution; count++) {
+
+		map[count] = new bool[width / resolution]{ false };
 	}
 
 	//hsv 분석을 위한 hsv용 mat 선언
@@ -48,28 +59,28 @@ void HSVFilter::getOnlyImage(cv::InputArray _src, cv::OutputArray _dst, FilterOp
 	cv::cvtColor(src, hsvMat, cv::COLOR_RGB2HSV);
 
 	//s와 v 스트레칭을 위한 최솟값, 최댓값 연산
-	for (int y = 0; y < height; y++)
-		for (int x = 0; x < width; x++) {
-		
-			sMinMax[0] > hsvMat.at<cv::Vec3b>(y, x)[1] ? 
-				sMinMax[0] = hsvMat.at<cv::Vec3b>(y, x)[1] : false;
-			sMinMax[1] < hsvMat.at<cv::Vec3b>(y, x)[1] ? 
-				sMinMax[1] = hsvMat.at<cv::Vec3b>(y, x)[1] : false;
+	for (int y = 0; y < height / resolution; y++)
+		for (int x = 0; x < width / resolution; x++) {
 
-			vMinMax[0] > hsvMat.at<cv::Vec3b>(y, x)[2] ?
-				vMinMax[0] = hsvMat.at<cv::Vec3b>(y, x)[2] : false;
-			vMinMax[1] < hsvMat.at<cv::Vec3b>(y, x)[2] ?
-				vMinMax[1] = hsvMat.at<cv::Vec3b>(y, x)[2] : false;
+			sMinMax[0] > hsvMat.at<cv::Vec3b>(y * resolution, x * resolution)[1] ?
+				sMinMax[0] = hsvMat.at<cv::Vec3b>(y * resolution, x * resolution)[1] : false;
+			sMinMax[1] < hsvMat.at<cv::Vec3b>(y * resolution, x * resolution)[1] ?
+				sMinMax[1] = hsvMat.at<cv::Vec3b>(y * resolution, x * resolution)[1] : false;
+
+			vMinMax[0] > hsvMat.at<cv::Vec3b>(y * resolution, x * resolution)[2] ?
+				vMinMax[0] = hsvMat.at<cv::Vec3b>(y * resolution, x * resolution)[2] : false;
+			vMinMax[1] < hsvMat.at<cv::Vec3b>(y * resolution, x * resolution)[2] ?
+				vMinMax[1] = hsvMat.at<cv::Vec3b>(y * resolution, x * resolution)[2] : false;
 		}
 
 	//스트레칭 후 바운더리 통과 여부 확인
-	for (int y = 0; y < height; y++) {
-		for (int x = 0; x < width; x++) {
+	for (int y = 0; y < height / resolution; y++) {
+		for (int x = 0; x < width / resolution; x++) {
 
 			//계산의 편의성을 위해 hsv값 선언
-			int h = hsvMat.at<cv::Vec3b>(y, x)[0];
-			int s = hsvMat.at<cv::Vec3b>(y, x)[1];
-			int v = hsvMat.at<cv::Vec3b>(y, x)[2];
+			int h = hsvMat.at<cv::Vec3b>(y * resolution, x * resolution)[0];
+			int s = hsvMat.at<cv::Vec3b>(y * resolution, x * resolution)[1];
+			int v = hsvMat.at<cv::Vec3b>(y * resolution, x * resolution)[2];
 
 			//s와 v 스트래칭
 			s = (s - sMinMax[0]) * 255.0 / (double)(sMinMax[1] - sMinMax[0]);
@@ -81,20 +92,29 @@ void HSVFilter::getOnlyImage(cv::InputArray _src, cv::OutputArray _dst, FilterOp
 				continue;
 
 			//컨티뉴로 안넘어갔을경우, 즉 바운더리 내부일 경우 맵에 해당 좌표는 1로 기록
-			map[y][x] = 1;
+			map[y][x] = true;
 		}
 	}
-
+	
 	//맵을 토대로 dst에 1인 경우 255으로, 0일 경우 0으로 지정
-	for (int y = 0; y < height; y++)
-		for (int x = 0; x < width; x++) {
-		
-			if (map[y][x] == 1)
-				dst.at<uchar>(y, x) = (unsigned char)255;
-			else
-				dst.at<uchar>(y, x) = (unsigned char)0;
+	for (int y = 0; y < height / resolution; y++)
+		for (int x = 0; x < width / resolution; x++) {
+
+			if (map[y][x])
+				for (int h = 0; h < resolution; h++)
+					for (int w = 0; w < resolution; w++)
+						dst.at<uchar>(y * resolution + h, x * resolution + w) = (unsigned char)255;
 		}
 	
+	//메모리 free
+	for (int count = 0; count < height / resolution; count++) {
+
+		delete[] (map[count]);
+	}
+
+	delete[] map;
+
+	return;
 }
 
 //h값의 경우, 180=0이므로, 순환을 고려한 별도의 바운더리 체크 함수 지정
@@ -185,6 +205,12 @@ void FilterOption::setVBoundary(int b)
 	return;
 }
 
+void FilterOption::setResolution(int n)
+{
+	resolution = n;
+	return;
+}
+
 int FilterOption::getHBoundary()
 {
 	return HBoundary;
@@ -198,4 +224,9 @@ int FilterOption::getSBoundary()
 int FilterOption::getVBoundary()
 {
 	return VBoundary;
+}
+
+int FilterOption::getResolution()
+{
+	return resolution;
 }
