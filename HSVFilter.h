@@ -1,9 +1,9 @@
 #pragma once
-#include<opencv2/core.hpp>
-#include<opencv2/highgui.hpp>
+#include<core.hpp>
+#include<highgui.hpp>
 #include<iostream>
 #include<math.h>
-#include<opencv2/imgproc.hpp>
+#include<imgproc.hpp>
 
 /*
 * 전경 추출 및 색 필터링을 해주는 클래스

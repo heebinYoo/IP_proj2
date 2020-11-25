@@ -20,7 +20,9 @@ namespace ip_proj_lineData {
     int* keyCode;
 }
 int main() {
-	cv::VideoCapture cap(0);
+
+ 	cv::VideoCapture cap(0);
+
 
 	if (!cap.isOpened())
 	{
@@ -48,7 +50,7 @@ int main() {
 		cv::flip(img, img, 1);//웹캠이라서 좌우반전 걸어야 정상적으로 나옴
 
 		cv::Mat img_guide;
-		img.copyTo(img_guide);
+        img.copyTo(img_guide);
 		int rows = img_guide.rows;
 		int cols = img_guide.cols;
 		cv::line(img_guide, cv::Point(cols / 2, 0), cv::Point(cols / 2, rows - 1), cv::Scalar(255, 0, 0), 1, 8, 0);
@@ -136,9 +138,10 @@ int main() {
         }
         cv::imshow("guided image", img_guide);
         int ret = cv::waitKey(0);
-        if (ret >= 97 && ret <= 122) {
-            ret - 32;
-        }
+        std::cout << ret << std::endl;
+        if (ret >= 97 && ret <= 122)
+            ret = ret - 32;
+        
         ip_proj_lineData::keyCode[counter] = ret;
         counter++;
         if (counter == 2) {
@@ -162,14 +165,34 @@ int main() {
         //cv::putText(img_guide, "y1", cv::Point(0, ip_proj_lineData::y1), cv::FONT_HERSHEY_PLAIN, 2.0, cv::Scalar(0, 0, 255), 1);
         //cv::putText(img_guide, "y2", cv::Point(0, ip_proj_lineData::y2), cv::FONT_HERSHEY_PLAIN, 2.0, cv::Scalar(0, 0, 255), 1);
         
+        
+        
         cv::Mat redOnly;
+
+        std::chrono::steady_clock::time_point filter_t1 = std::chrono::steady_clock::now();
         hsvFilter.getRedOnlyImage(img, redOnly, FilterOption());
+        std::chrono::steady_clock::time_point filter_t2 = std::chrono::steady_clock::now();
+
+
+
+        std::chrono::steady_clock::time_point extract_t1 = std::chrono::steady_clock::now();
         std::vector<cv::Point2f> result = extractor.getSquareVertex(redOnly, ExtractOption());
+        std::chrono::steady_clock::time_point extract_t2 = std::chrono::steady_clock::now();
+
+        std::chrono::steady_clock::time_point track_t1 = std::chrono::steady_clock::now();
         cv::Point pos = tracker.trackAndAction(result, TrackerOption(ip_proj_lineData::y1, ip_proj_lineData::y2, ip_proj_lineData::x1, ip_proj_lineData::keyCode));
+        std::chrono::steady_clock::time_point track_t2 = std::chrono::steady_clock::now();
+
+        
+        double filter_t = std::chrono::duration_cast<std::chrono::duration<double>>(filter_t2 - filter_t1).count();
+        double extract_t = std::chrono::duration_cast<std::chrono::duration<double>>(extract_t2 - extract_t1).count();
+        double track_t = std::chrono::duration_cast<std::chrono::duration<double>>(track_t2 - track_t1).count();
+
+        std::cout << "\rfilter : "<< filter_t << "\textract : " << extract_t << "\ttrack : "<< track_t;
+
+
         cv::circle(img_guide, pos, 2.0, Scalar(0, 0, 255), 3, 8);
-
-
-
+        cv::imshow("redOnly image", redOnly);
         cv::imshow("guided image", img_guide);
         if (cv::waitKey(1) == 27) {
             break;

@@ -3,7 +3,7 @@
 #include <Windows.h>
 cv::Point SquareTracker::trackAndAction(std::vector<cv::Point2f> input, TrackerOption option)
 {
-	Sleep(5); //may remove
+	//Sleep(5); //may add
 	cv::Moments mom = cv::moments(input);
 
 	cv::Point rectLocation = cv::Point(mom.m10/mom.m00, mom.m01/mom.m00);
