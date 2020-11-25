@@ -23,13 +23,16 @@ public:
 	void setHBoundary(int b);
 	void setSBoundary(int b);
 	void setVBoundary(int b);
+	void setResolution(int n);
 	int getHBoundary();
 	int getSBoundary();
 	int getVBoundary();
+	int getResolution();
 
 private:
 	int baseColor=0;
 	int HBoundary=60, SBoundary=250, VBoundary=250;
+	int resolution = 5;
 };
 
 class HSVFilter
