@@ -167,16 +167,16 @@ int main() {
         
         
         
-        cv::Mat redOnly;
+        cv::Mat blueOnly;
 
         std::chrono::steady_clock::time_point filter_t1 = std::chrono::steady_clock::now();
-        hsvFilter.getRedOnlyImage(img, redOnly, FilterOption());
+        hsvFilter.getBlueOnlyImage(img, blueOnly, FilterOption());
         std::chrono::steady_clock::time_point filter_t2 = std::chrono::steady_clock::now();
 
 
 
         std::chrono::steady_clock::time_point extract_t1 = std::chrono::steady_clock::now();
-        std::vector<cv::Point2f> result = extractor.getSquareVertex(redOnly, ExtractOption());
+        std::vector<cv::Point2f> result = extractor.getSquareVertex(blueOnly, ExtractOption());
         std::chrono::steady_clock::time_point extract_t2 = std::chrono::steady_clock::now();
 
         std::chrono::steady_clock::time_point track_t1 = std::chrono::steady_clock::now();
@@ -192,7 +192,7 @@ int main() {
 
 
         cv::circle(img_guide, pos, 2.0, Scalar(0, 0, 255), 3, 8);
-        cv::imshow("redOnly image", redOnly);
+        cv::imshow("filtered image", blueOnly);
         cv::imshow("guided image", img_guide);
         if (cv::waitKey(1) == 27) {
             break;

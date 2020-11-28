@@ -12,7 +12,7 @@ cv::Point SquareTracker::trackAndAction(std::vector<cv::Point2f> input, TrackerO
 	ZeroMemory(&key_input, sizeof(INPUT)); //0으로 input을 초기화
 	key_input.type = INPUT_KEYBOARD;
 	
-	if (rectLocation.x > option.x1) {
+	if (rectLocation.x < option.x1) {
 		if (rectLocation.y < option.y1) {
 			key_input.ki.wVk = (BYTE) (option.keyCodes)[0];
 			//1
